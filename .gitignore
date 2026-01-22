@@ -1,0 +1,14 @@
+# VS Code
+.vscode/
+
+# Python / ML
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+venv-ml/
+.env
+
+# Pastas que não sobem
+MATERIAL DA AULA/
