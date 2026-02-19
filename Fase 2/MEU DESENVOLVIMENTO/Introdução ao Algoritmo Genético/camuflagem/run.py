@@ -71,37 +71,40 @@ MUTATION_RATE = 0.1  # 10%
 
 def mutate(individual):
     if random.random() < MUTATION_RATE:
-        individual.r = random.randint(0, 255)
-
+        individual.r = min(255, max(0, individual.r + random.randint(-10, 10)))
     if random.random() < MUTATION_RATE:
-        individual.g = random.randint(0, 255)
-
+        individual.g = min(255, max(0, individual.g + random.randint(-10, 10)))
     if random.random() < MUTATION_RATE:
-        individual.b = random.randint(0, 255)
+        individual.b = min(255, max(0, individual.b + random.randint(-10, 10)))
+
+
+def calculate_error(individual):
+    return (
+        (individual.r - BACKGROUND_COLOR[0]) ** 2 +
+        (individual.g - BACKGROUND_COLOR[1]) ** 2 +
+        (individual.b - BACKGROUND_COLOR[2]) ** 2
+    )
 
 
 def evolve_population(population):
     new_population = []
 
-    # 1. Calcular fitness de todos
-    for individuo in population:
-        calculate_fitness(individuo)
+    # ordenar por erro (menor é melhor)
+    population.sort(key=calculate_error)
 
-    # 2. Ordenar população pelo melhor fitness (maior primeiro)
-    population.sort(key=lambda ind: ind.fitness, reverse=True)
-
-    # 3. ELITISMO: preservar o melhor
-    elite = population[0]
+    # elitismo
+    best = population[0]
+    elite = Individual()
+    elite.r, elite.g, elite.b = best.r, best.g, best.b
     new_population.append(elite)
 
-    # 4. Gerar o resto da população
+    # seleção restrita
+    pais = population[:5]
+
     while len(new_population) < POPULATION_SIZE:
-        pai1 = select_parent(population)
-        pai2 = select_parent(population)
-
+        pai1, pai2 = random.sample(pais, 2)
         filho = crossover(pai1, pai2)
-       # mutate(filho)
-
+        mutate(filho)
         new_population.append(filho)
 
     return new_population
