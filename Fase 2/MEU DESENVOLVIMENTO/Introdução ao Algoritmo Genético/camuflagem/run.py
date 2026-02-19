@@ -27,7 +27,7 @@ class Individual:
 # FUNÇÕES DO ALGORITMO GENÉTICO
 # ===============================
 
-POPULATION_SIZE = 40
+POPULATION_SIZE = 12
 
 def create_population():
     population = []
@@ -80,12 +80,104 @@ def mutate(individual):
         individual.b = random.randint(0, 255)
 
 
+def evolve_population(population):
+    new_population = []
+
+    # 1. Calcular fitness de todos
+    for individuo in population:
+        calculate_fitness(individuo)
+
+    # 2. Ordenar população pelo melhor fitness (maior primeiro)
+    population.sort(key=lambda ind: ind.fitness, reverse=True)
+
+    # 3. ELITISMO: preservar o melhor
+    elite = population[0]
+    new_population.append(elite)
+
+    # 4. Gerar o resto da população
+    while len(new_population) < POPULATION_SIZE:
+        pai1 = select_parent(population)
+        pai2 = select_parent(population)
+
+        filho = crossover(pai1, pai2)
+       # mutate(filho)
+
+        new_population.append(filho)
+
+    return new_population
+
+
+
 
 # ===============================
 # VISUALIZAÇÃO (PYGAME)
 # ===============================
 
+import pygame
+import sys
+
+# inicializa o pygame
+pygame.init()
+
+# cria a janela
+WIDTH, HEIGHT = 600, 400
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Camouflage - Teste")
+
+# controle de FPS
+clock = pygame.time.Clock()
+
+# antes do loop
+population = create_population()
+last_evolution_time = 0
+EVOLUTION_INTERVAL = 1000  # 1 segundo
+colunas = 8
+TAMANHO = 50
+
 
 # ===============================
 # LOOP PRINCIPAL
 # ===============================
+
+
+running = True
+while running:
+    clock.tick(60)
+
+    # eventos
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # TEMPO ATUAL
+    current_time = pygame.time.get_ticks()
+
+    # EVOLUÇÃO (lógica)
+    if current_time - last_evolution_time > EVOLUTION_INTERVAL:
+        population = evolve_population(population)
+        last_evolution_time = current_time
+
+    # DESENHO
+    screen.fill(BACKGROUND_COLOR)
+
+    for i, individuo in enumerate(population):
+        coluna = i % colunas
+        linha = i // colunas
+
+        x = coluna * TAMANHO
+        y = linha * TAMANHO
+
+        pygame.draw.rect(
+            screen,
+            (individuo.r, individuo.g, individuo.b),
+            (x, y, 40, 40)
+        )
+
+
+    pygame.display.flip()
+
+pygame.quit()
+sys.exit()
+
+
+
