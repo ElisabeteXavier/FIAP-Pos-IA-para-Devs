@@ -9,6 +9,8 @@ __pycache__/
 venv/
 venv-ml/
 .env
+*.csv
+
 
 # Pastas que não sobem
 MATERIAL DA AULA/
